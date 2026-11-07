@@ -1,4 +1,4 @@
-const CACHE = 'wscratch-v1';
+const CACHE = 'wscratch-v2';
 const ASSETS = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
@@ -14,6 +14,24 @@ self.addEventListener('activate', function (e) {
 
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+
+  // 页面导航：网络优先，失败再用缓存（保证更新能拿到）
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).then(function (resp) {
+        const copy = resp.clone();
+        caches.open(CACHE).then(function (c) { c.put('./index.html', copy); }).catch(function () {});
+        return resp;
+      }).catch(function () {
+        return caches.match('./index.html').then(function (hit) {
+          return hit || caches.match('./');
+        });
+      })
+    );
+    return;
+  }
+
+  // 静态资源：缓存优先
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(function (hit) {
       if (hit) return hit;
