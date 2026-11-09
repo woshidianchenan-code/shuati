@@ -1,4 +1,4 @@
-const CACHE = 'wscratch-v3';
+const CACHE = 'wscratch-v4';
 const ASSETS = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
